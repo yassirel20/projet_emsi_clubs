@@ -1,0 +1,28 @@
+{% extends 'clubs/base.html' %}
+{% block title %}Adhésions — {{ club.nom }}{% endblock %}
+{% block content %}
+<div class="page-header"><div class="container"><h1>Gestion des adhésions</h1><p>Club : {{ club.nom }}</p></div></div>
+<div class="container" style="padding-bottom:3rem;">
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Étudiant</th><th>Date demande</th><th>Statut</th><th>Actions</th></tr></thead>
+      <tbody>
+        {% for adh in adhesions %}
+        <tr>
+          <td><strong>{{ adh.etudiant.get_full_name|default:adh.etudiant.username }}</strong><br><small class="text-gray">{{ adh.etudiant.email }}</small></td>
+          <td>{{ adh.date_demande|date:"d/m/Y H:i" }}</td>
+          <td><span class="badge {% if adh.statut == 'accepte' %}badge-success{% elif adh.statut == 'refuse' %}badge-danger{% else %}badge-warning{% endif %}">{{ adh.get_statut_display }}</span></td>
+          <td>
+            {% if adh.statut == 'en_attente' %}
+              <a href="{% url 'traiter_adhesion' adh.pk 'accepter' %}" class="btn btn-success btn-sm">✓ Accepter</a>
+              <a href="{% url 'traiter_adhesion' adh.pk 'refuser' %}" class="btn btn-danger btn-sm">✗ Refuser</a>
+            {% else %}— {% endif %}
+          </td>
+        </tr>
+        {% empty %}<tr><td colspan="4" class="text-gray" style="text-align:center;padding:2rem;">Aucune demande d'adhésion.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

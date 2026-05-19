@@ -1,0 +1,27 @@
+{% extends 'clubs/base.html' %}
+{% block title %}Connexion — Emsi Clubs{% endblock %}
+{% block content %}
+<div class="page-header"><div class="container"><h1>Connexion</h1><p>Accédez à votre espace Emsi Clubs</p></div></div>
+<div class="container">
+<div class="form-card">
+  <h2 style="font-family:'Playfair Display',serif;margin-bottom:1.5rem;">Se connecter</h2>
+  <form method="post">
+    {% csrf_token %}
+    {% for field in form %}
+    <div class="form-group">
+      <label class="form-label">{{ field.label }}</label>
+      <input class="form-control {% if field.errors %}error{% endif %}"
+             type="{{ field.field.widget.input_type }}"
+             name="{{ field.html_name }}"
+             value="{{ field.value|default:'' }}"
+             {% if field.field.required %}required{% endif %}>
+      {% for error in field.errors %}<div class="error-msg">{{ error }}</div>{% endfor %}
+    </div>
+    {% endfor %}
+    {% if form.non_field_errors %}<div class="alert alert-error">{{ form.non_field_errors }}</div>{% endif %}
+    <button type="submit" class="btn btn-primary w-full mt-2">Se connecter</button>
+  </form>
+  <p class="text-gray text-small mt-2" style="text-align:center;">Pas encore de compte ? <a href="{% url 'inscription' %}" class="text-accent">S'inscrire</a></p>
+</div>
+</div>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends 'clubs/base.html' %}
+{% block title %}Clubs — Emsi Clubs{% endblock %}
+{% load club_extras %}
+{% block content %}
+<div class="page-header">
+  <div class="container flex-between">
+    <div><h1>Tous les clubs</h1><p>Découvrez et rejoignez les clubs de votre établissement</p></div>
+    {% if user.is_authenticated and user.profil.role in 'admin,responsable' %}
+      <a href="{% url 'creer_club' %}" class="btn btn-primary">+ Créer un club</a>
+    {% endif %}
+  </div>
+</div>
+<div class="container" style="padding-bottom:3rem;">
+  <div class="grid-3">
+    {% for club in clubs %}
+    <div class="club-card">
+      <div class="club-card-header">
+        <div class="club-logo">{% if club.logo %}<img src="{{ club.logo.url }}" alt="">{% else %}🏛️{% endif %}</div>
+        <h3 style="font-size:1.1rem;font-weight:700;">{{ club.nom }}</h3>
+        <span class="badge cat-{{ club.categorie }}" style="margin-top:0.4rem;display:inline-block;">{{ club.get_categorie_display }}</span>
+      </div>
+      <div class="club-card-body">
+        <p class="card-text">{{ club.description|truncatechars:90 }}</p>
+        <div class="club-meta"><span>👥 {{ club.nb_membres }} membres</span></div>
+        <div class="flex gap-1 mt-2" style="flex-wrap:wrap;">
+          <a href="{% url 'detail_club' club.pk %}" class="btn btn-outline btn-sm">Voir →</a>
+          {% if user.is_authenticated %}
+            {% with st=adhesions_dict|get_item:club.pk %}
+              {% if st == 'accepte' %}
+                <span class="badge badge-success">✓ Membre</span>
+              {% elif st == 'en_attente' %}
+                <span class="badge badge-warning">⏳ En attente</span>
+              {% elif st == 'refuse' %}
+                <span class="badge badge-danger">✗ Refusé</span>
+              {% else %}
+                <a href="{% url 'demander_adhesion' club.pk %}" class="btn btn-primary btn-sm">Rejoindre</a>
+              {% endif %}
+            {% endwith %}
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% empty %}
+      <p class="text-gray">Aucun club disponible.</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

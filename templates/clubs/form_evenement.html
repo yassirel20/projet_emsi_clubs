@@ -1,0 +1,27 @@
+{% extends 'clubs/base.html' %}
+{% block title %}{{ titre }} — Emsi Clubs{% endblock %}
+{% block content %}
+<div class="page-header"><div class="container"><h1>{{ titre }}</h1><p>Club : {{ club.nom }}</p></div></div>
+<div class="container"><div class="form-card">
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {% for field in form %}
+    <div class="form-group">
+      <label class="form-label">{{ field.label }}</label>
+      {% if field.field.widget.input_type == 'textarea' %}
+        <textarea class="form-control" name="{{ field.html_name }}" rows="4">{{ field.value|default:'' }}</textarea>
+      {% elif field.field.widget.input_type == 'file' %}
+        <input class="form-control" type="file" name="{{ field.html_name }}">
+      {% else %}
+        <input class="form-control" type="{{ field.field.widget.input_type }}" name="{{ field.html_name }}" value="{{ field.value|default:'' }}">
+      {% endif %}
+      {% for error in field.errors %}<div class="error-msg">{{ error }}</div>{% endfor %}
+    </div>
+    {% endfor %}
+    <div class="flex gap-1 mt-3">
+      <button type="submit" class="btn btn-primary">Créer l'événement</button>
+      <a href="{% url 'liste_evenements' %}" class="btn btn-outline">Annuler</a>
+    </div>
+  </form>
+</div></div>
+{% endblock %}

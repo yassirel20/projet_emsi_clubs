@@ -1,0 +1,26 @@
+{% extends 'clubs/base.html' %}
+{% block title %}Utilisateurs — Admin{% endblock %}
+{% block content %}
+<div class="page-header"><div class="container"><h1>Gestion des utilisateurs</h1></div></div>
+<div class="container" style="padding-bottom:3rem;">
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Utilisateur</th><th>Email</th><th>Rôle</th><th>Changer le rôle</th></tr></thead>
+      <tbody>
+        {% for p in profils %}
+        <tr>
+          <td><strong>{{ p.user.get_full_name|default:p.user.username }}</strong></td>
+          <td>{{ p.user.email }}</td>
+          <td><span class="badge badge-info">{{ p.get_role_display }}</span></td>
+          <td class="flex gap-1">
+            {% if p.role != 'admin' %}<a href="{% url 'changer_role' p.user.pk 'admin' %}" class="btn btn-danger btn-sm">Admin</a>{% endif %}
+            {% if p.role != 'responsable' %}<a href="{% url 'changer_role' p.user.pk 'responsable' %}" class="btn btn-warning btn-sm">Responsable</a>{% endif %}
+            {% if p.role != 'etudiant' %}<a href="{% url 'changer_role' p.user.pk 'etudiant' %}" class="btn btn-secondary btn-sm">Étudiant</a>{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends 'clubs/base.html' %}
+{% block title %}{{ club.nom }} — Emsi Clubs{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="container flex-between">
+    <div>
+      <h1>{{ club.nom }}</h1>
+      <p>{{ club.get_categorie_display }} · {{ club.nombre_membres }} membres</p>
+    </div>
+    <div class="flex gap-1">
+      {% if user.is_authenticated %}
+        {% if user == club.responsable or user.profil.role == 'admin' %}
+          <a href="{% url 'modifier_club' club.pk %}" class="btn btn-warning btn-sm">Modifier</a>
+          <a href="{% url 'gerer_adhesions' club.pk %}" class="btn btn-secondary btn-sm">Adhésions</a>
+          <a href="{% url 'creer_evenement' club.pk %}" class="btn btn-primary btn-sm">+ Événement</a>
+        {% elif not adhesion %}
+          <a href="{% url 'demander_adhesion' club.pk %}" class="btn btn-primary">Rejoindre le club</a>
+        {% elif adhesion.statut == 'en_attente' %}
+          <span class="badge badge-warning">Demande en attente</span>
+        {% elif adhesion.statut == 'accepte' %}
+          <span class="badge badge-success">✓ Vous êtes membre</span>
+        {% endif %}
+      {% endif %}
+    </div>
+  </div>
+</div>
+<div class="container" style="padding-bottom:3rem;">
+  <div style="display:grid;grid-template-columns:1fr 320px;gap:2rem;align-items:start;">
+    <div>
+      <div class="card mb-3"><div class="card-body">
+        <h3 style="font-family:'Playfair Display',serif;margin-bottom:0.75rem;">À propos</h3>
+        <p style="line-height:1.7;color:var(--gray);">{{ club.description }}</p>
+        <p class="text-small text-gray mt-2">Responsable : <strong>{{ club.responsable.get_full_name|default:club.responsable.username }}</strong></p>
+      </div></div>
+      <h3 style="font-family:'Playfair Display',serif;margin-bottom:1rem;">Événements</h3>
+      <div style="display:flex;flex-direction:column;gap:1rem;">
+        {% for evt in evenements %}
+        <div class="event-card">
+          <div class="event-date"><div class="day">{{ evt.date_debut|date:"d" }}</div><div class="month">{{ evt.date_debut|date:"M" }}</div></div>
+          <div class="event-info" style="flex:1;">
+            <h4>{{ evt.titre }}</h4>
+            <p>{{ evt.lieu }} · {{ evt.nombre_inscrits }}/{{ evt.capacite_max }}</p>
+            <span class="badge badge-info">{{ evt.get_statut_display }}</span>
+          </div>
+          {% if evt.statut == 'planifie' %}
+          <div style="display:flex;align-items:center;">
+            <a href="{% url 'inscrire_evenement' evt.pk %}" class="btn btn-primary btn-sm">S'inscrire</a>
+          </div>
+          {% endif %}
+        </div>
+        {% empty %}<p class="text-gray">Aucun événement pour ce club.</p>
+        {% endfor %}
+      </div>
+    </div>
+    <div>
+      <div class="card"><div class="card-body">
+        <h4 style="font-family:'Playfair Display',serif;margin-bottom:1rem;">Membres ({{ membres.count }})</h4>
+        {% for m in membres %}
+        <div class="flex-center gap-1 mb-2">
+          <div style="width:36px;height:36px;border-radius:50%;background:var(--accent2);color:white;display:flex;align-items:center;justify-content:center;font-size:0.9rem;font-weight:700;flex-shrink:0;">
+            {{ m.etudiant.first_name|first|default:m.etudiant.username|first|upper }}
+          </div>
+          <div>
+            <div style="font-size:0.9rem;font-weight:600;">{{ m.etudiant.get_full_name|default:m.etudiant.username }}</div>
+          </div>
+        </div>
+        {% endfor %}
+      </div></div>
+    </div>
+  </div>
+</div>
+{% endblock %}

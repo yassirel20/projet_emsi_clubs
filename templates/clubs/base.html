@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Emsi clubs{% endblock %}</title>
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="{% url 'accueil' %}" class="navbar-brand">🎓 Emsi<span>Clubs</span></a>
+  <div class="nav-links">
+    <a href="{% url 'liste_clubs' %}">Clubs</a>
+    <a href="{% url 'liste_evenements' %}">Événements</a>
+    {% if user.is_authenticated %}
+      {% if user.profil.role == 'admin' %}
+        <a href="{% url 'gerer_utilisateurs' %}">Utilisateurs</a>
+        <a href="{% url 'statistiques' %}">Statistiques</a>
+      {% endif %}
+      <a href="{% url 'dashboard' %}">Dashboard</a>
+      <a href="{% url 'profil' %}">Mon Profil</a>
+      <a href="{% url 'deconnexion' %}" class="btn-nav">Déconnexion</a>
+    {% else %}
+      <a href="{% url 'connexion' %}">Connexion</a>
+      <a href="{% url 'inscription' %}" class="btn-nav">S'inscrire</a>
+    {% endif %}
+  </div>
+</nav>
+
+<div id="messages-container">
+  {% if messages %}
+    <div class="container" style="padding-top:1rem;">
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+
+{% block content %}{% endblock %}
+
+<footer style="background:var(--primary);color:rgba(255,255,255,0.5);text-align:center;padding:2rem;margin-top:4rem;font-size:0.85rem;">
+  © 2026 Emsi Clubs — Gestion des clubs étudiants by Yassir El Manssouri & Anass Benbassou & Ilyass Mrabti
+</footer>
+</body>
+</html>

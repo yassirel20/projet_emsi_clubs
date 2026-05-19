@@ -1,0 +1,138 @@
+{% extends 'clubs/base.html' %}
+{% block title %}Dashboard — Emsi Clubs{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <h1>Bonjour, {{ user.get_full_name|default:user.username }} 👋</h1>
+    <p>{{ user.profil.get_role_display }}</p>
+  </div>
+</div>
+
+<div class="container" style="padding-bottom:3rem;">
+
+{% if role == 'admin' %}
+  <!-- ADMIN DASHBOARD -->
+  <div class="grid-4 mb-4">
+    <div class="stat-card"><div class="stat-icon blue">🏛️</div><div><div class="stat-value">{{ nb_clubs }}</div><div class="stat-label">Clubs actifs</div></div></div>
+    <div class="stat-card"><div class="stat-icon green">👤</div><div><div class="stat-value">{{ nb_users }}</div><div class="stat-label">Utilisateurs</div></div></div>
+    <div class="stat-card"><div class="stat-icon gold">⏳</div><div><div class="stat-value">{{ nb_adhesions }}</div><div class="stat-label">Demandes en attente</div></div></div>
+    <div class="stat-card"><div class="stat-icon red">📅</div><div><div class="stat-value">{{ nb_evenements }}</div><div class="stat-label">Événements</div></div></div>
+  </div>
+  <div class="flex-between mb-2">
+    <h3 style="font-family:'Playfair Display',serif;">Derniers clubs créés</h3>
+    <a href="{% url 'creer_club' %}" class="btn btn-primary btn-sm">+ Créer un club</a>
+  </div>
+  <div class="table-wrap mb-4">
+    <table>
+      <thead><tr><th>Club</th><th>Catégorie</th><th>Responsable</th><th>Membres</th><th>Actions</th></tr></thead>
+      <tbody>
+        {% for club in derniers_clubs %}
+        <tr>
+          <td><strong>{{ club.nom }}</strong></td>
+          <td><span class="badge cat-{{ club.categorie }}">{{ club.get_categorie_display }}</span></td>
+          <td>{{ club.responsable.get_full_name|default:"—" }}</td>
+          <td>{{ club.nombre_membres }}</td>
+          <td>
+            <a href="{% url 'detail_club' club.pk %}" class="btn btn-secondary btn-sm">Voir</a>
+            <a href="{% url 'modifier_club' club.pk %}" class="btn btn-warning btn-sm">Modifier</a>
+            <a href="{% url 'supprimer_club' club.pk %}" class="btn btn-danger btn-sm" onclick="return confirm('Supprimer ?')">Suppr.</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="flex-between mb-2">
+    <h3 style="font-family:'Playfair Display',serif;">Dernières demandes d'adhésion</h3>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Étudiant</th><th>Club</th><th>Date</th><th>Statut</th></tr></thead>
+      <tbody>
+        {% for adh in dernieres_adhesions %}
+        <tr>
+          <td>{{ adh.etudiant.get_full_name }}</td>
+          <td>{{ adh.club.nom }}</td>
+          <td>{{ adh.date_demande|date:"d/m/Y" }}</td>
+          <td><span class="badge {% if adh.statut == 'accepte' %}badge-success{% elif adh.statut == 'refuse' %}badge-danger{% else %}badge-warning{% endif %}">{{ adh.get_statut_display }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+{% elif role == 'responsable' %}
+  <!-- RESPONSABLE DASHBOARD -->
+  <div class="grid-4 mb-4">
+    <div class="stat-card"><div class="stat-icon blue">🏛️</div><div><div class="stat-value">{{ mes_clubs.count }}</div><div class="stat-label">Mes clubs</div></div></div>
+    <div class="stat-card"><div class="stat-icon green">👥</div><div><div class="stat-value">{{ nb_membres }}</div><div class="stat-label">Membres acceptés</div></div></div>
+    <div class="stat-card"><div class="stat-icon gold">⏳</div><div><div class="stat-value">{{ demandes_en_attente }}</div><div class="stat-label">Demandes à traiter</div></div></div>
+  </div>
+  <div class="flex-between mb-2">
+    <h3 style="font-family:'Playfair Display',serif;">Mes clubs</h3>
+    <a href="{% url 'creer_club' %}" class="btn btn-primary btn-sm">+ Nouveau club</a>
+  </div>
+  <div class="grid-3 mb-4">
+    {% for club in mes_clubs %}
+    <div class="club-card">
+      <div class="club-card-header">
+        <div class="club-logo">{% if club.logo %}<img src="{{ club.logo.url }}" alt="">{% else %}🏛️{% endif %}</div>
+        <h3 style="font-size:1.1rem;">{{ club.nom }}</h3>
+      </div>
+      <div class="club-card-body">
+        <p class="text-gray text-small">{{ club.nombre_membres }} membres</p>
+        <div class="flex gap-1 mt-2">
+          <a href="{% url 'gerer_adhesions' club.pk %}" class="btn btn-secondary btn-sm">Adhésions</a>
+          <a href="{% url 'creer_evenement' club.pk %}" class="btn btn-primary btn-sm">+ Événement</a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  <h3 style="font-family:'Playfair Display',serif;" class="mb-2">Prochains événements</h3>
+  <div style="display:flex;flex-direction:column;gap:1rem;max-width:600px;">
+    {% for evt in prochains_evenements %}
+    <div class="event-card">
+      <div class="event-date"><div class="day">{{ evt.date_debut|date:"d" }}</div><div class="month">{{ evt.date_debut|date:"M" }}</div></div>
+      <div class="event-info"><h4>{{ evt.titre }}</h4><p>{{ evt.lieu }} · {{ evt.nombre_inscrits }}/{{ evt.capacite_max }} inscrits</p></div>
+    </div>
+    {% empty %}<p class="text-gray">Aucun événement planifié.</p>
+    {% endfor %}
+  </div>
+
+{% else %}
+  <!-- ÉTUDIANT DASHBOARD -->
+  <div class="grid-3 mb-4">
+    <div class="stat-card"><div class="stat-icon blue">🏛️</div><div><div class="stat-value">{{ mes_clubs.count }}</div><div class="stat-label">Mes clubs</div></div></div>
+    <div class="stat-card"><div class="stat-icon red">📅</div><div><div class="stat-value">{{ mes_participations.count }}</div><div class="stat-label">Mes participations</div></div></div>
+  </div>
+  <h3 style="font-family:'Playfair Display',serif;" class="mb-2">Mes clubs</h3>
+  <div class="grid-3 mb-4">
+    {% for club in mes_clubs %}
+    <div class="club-card">
+      <div class="club-card-header">
+        <div class="club-logo">{% if club.logo %}<img src="{{ club.logo.url }}" alt="">{% else %}🏛️{% endif %}</div>
+        <h3 style="font-size:1rem;">{{ club.nom }}</h3>
+      </div>
+      <div class="club-card-body">
+        <a href="{% url 'detail_club' club.pk %}" class="btn btn-outline btn-sm">Voir le club</a>
+      </div>
+    </div>
+    {% empty %}<p class="text-gray">Vous n'avez rejoint aucun club. <a href="{% url 'liste_clubs' %}" class="text-accent">Explorer les clubs →</a></p>
+    {% endfor %}
+  </div>
+  <h3 style="font-family:'Playfair Display',serif;" class="mb-2">Événements disponibles</h3>
+  <div style="display:flex;flex-direction:column;gap:1rem;max-width:600px;">
+    {% for evt in evenements_dispo %}
+    <div class="event-card">
+      <div class="event-date"><div class="day">{{ evt.date_debut|date:"d" }}</div><div class="month">{{ evt.date_debut|date:"M" }}</div></div>
+      <div class="event-info" style="flex:1;"><h4>{{ evt.titre }}</h4><p>{{ evt.club.nom }} · {{ evt.lieu }}</p></div>
+      <div style="display:flex;align-items:center;"><a href="{% url 'inscrire_evenement' evt.pk %}" class="btn btn-primary btn-sm">S'inscrire</a></div>
+    </div>
+    {% empty %}<p class="text-gray">Aucun événement disponible.</p>
+    {% endfor %}
+  </div>
+{% endif %}
+
+</div>
+{% endblock %}

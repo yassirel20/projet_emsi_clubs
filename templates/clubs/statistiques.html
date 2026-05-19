@@ -1,0 +1,33 @@
+{% extends 'clubs/base.html' %}
+{% block title %}Statistiques — Admin{% endblock %}
+{% block content %}
+<div class="page-header"><div class="container"><h1>📊 Statistiques</h1><p>Vue d'ensemble de la plateforme</p></div></div>
+<div class="container" style="padding-bottom:3rem;">
+  <div class="grid-4 mb-4">
+    <div class="stat-card"><div class="stat-icon blue">🏛️</div><div><div class="stat-value">{{ nb_clubs }}</div><div class="stat-label">Clubs</div></div></div>
+    <div class="stat-card"><div class="stat-icon green">👤</div><div><div class="stat-value">{{ nb_users }}</div><div class="stat-label">Utilisateurs</div></div></div>
+    <div class="stat-card"><div class="stat-icon red">📅</div><div><div class="stat-value">{{ nb_evenements }}</div><div class="stat-label">Événements</div></div></div>
+    <div class="stat-card"><div class="stat-icon gold">✅</div><div><div class="stat-value">{{ nb_participations }}</div><div class="stat-label">Participations</div></div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;">
+    <div class="card"><div class="card-body">
+      <h3 style="font-family:'Playfair Display',serif;margin-bottom:1rem;">Clubs par catégorie</h3>
+      {% for item in clubs_par_categorie %}
+      <div class="flex-between mb-2">
+        <span class="badge cat-{{ item.categorie }}">{{ item.categorie }}</span>
+        <strong>{{ item.total }}</strong>
+      </div>
+      {% endfor %}
+    </div></div>
+    <div class="card"><div class="card-body">
+      <h3 style="font-family:'Playfair Display',serif;margin-bottom:1rem;">Top 5 clubs (membres)</h3>
+      {% for club in top_clubs %}
+      <div class="flex-between mb-2">
+        <span>{{ club.nom }}</span>
+        <strong>{{ club.nb }} membres</strong>
+      </div>
+      {% endfor %}
+    </div></div>
+  </div>
+</div>
+{% endblock %}
